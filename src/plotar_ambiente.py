@@ -8,7 +8,9 @@ def plotar_ambiente(M, N):
   porcentagem_obstaculos = 0.20
   porcentagem_sujeiras = 0.10
   LIVRE, OBSTACULO, SUJEIRA, ROBO = 0, 1, 2, 3
-  CORES = ["#fcfcfb", "#0f0f0f", "#cde2fb"]
+  CORES = ["#fcfcfb", "#0f0f0f", "#cde2fb", "#7a0c0c"]
+  COR_ROBO = "#e03131"
+  COR_SUJEIRA = "#1c5fa8"
   FUNDO = "#f0efec"
 
   matriz = np.zeros((M, N), dtype=int)
@@ -25,10 +27,7 @@ def plotar_ambiente(M, N):
   for linha, coluna in posicoes_obstaculos:
       matriz[linha, coluna] = OBSTACULO
 
-  posicoes_livres = [(linha, coluna)
-                    for linha in range(M)
-                    for coluna in range(N)
-                    if matriz[linha, coluna] == LIVRE]
+  posicoes_livres = [(linha, coluna) for linha in range(M) for coluna in range(N) if matriz[linha, coluna] == LIVRE]
 
   posicoes_sujeiras = random.sample(posicoes_livres, total_sujeiras)
 
@@ -38,23 +37,25 @@ def plotar_ambiente(M, N):
   linha_robo, coluna_robo = random.choice(posicoes_livres)
   matriz[linha_robo, coluna_robo] = ROBO
 
+  celula = min(0.7, 10 / max(M, N))
+  detalhado = celula >= 0.25
 
-  fig, ax = plt.subplots(figsize=(0.7 * N, 0.7 * M))
+  fig, ax = plt.subplots(figsize=(celula * N, celula * M))
   fig.patch.set_facecolor(FUNDO)
-  ax.imshow(matriz, cmap=ListedColormap(CORES), vmin=LIVRE, vmax=SUJEIRA)
+  ax.imshow(matriz, cmap=ListedColormap(CORES), vmin=LIVRE, vmax=ROBO)
 
   for linha, coluna in posicoes_sujeiras:
-      ax.text(coluna, linha, "•", fontsize=12,
-              ha="center", va="center")
-  ax.text(coluna_robo, linha_robo, "🧹", fontname='Segoe UI Emoji', fontsize=12,
-          ha="center", va="center")
+      ax.add_patch(plt.Circle((coluna, linha), 0.15, facecolor=COR_SUJEIRA, edgecolor="none", zorder=3))
+  ax.add_patch(plt.Circle((coluna_robo, linha_robo), 0.22, facecolor=COR_ROBO, edgecolor="none", zorder=3))
 
-  ax.set_xticks(range(N))
-  ax.set_yticks(range(M))
-  ax.xaxis.set_ticks_position("top")
+  ax.set_xticks([])
+  ax.set_yticks([])
   ax.set_xticks([x - 0.5 for x in range(N + 1)], minor=True)
   ax.set_yticks([y - 0.5 for y in range(M + 1)], minor=True)
-  ax.grid(which="minor", color="#000000", linewidth=1)
-  ax.tick_params(which="both", length=0, colors="#898781")
+  if detalhado:
+      ax.grid(which="minor", color="#000000", linewidth=1)
+  else:
+      ax.grid(which="minor", color="#9a9a9a", linewidth=0.3)
+  ax.tick_params(which="both", length=0)
 
   plt.show()
